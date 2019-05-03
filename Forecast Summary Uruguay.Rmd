@@ -1,0 +1,186 @@
+---
+title: "1) Resumen proyección crecimiento económico Uruguay"
+author: "Bart Klein y Ricardo Mayer"
+date: "April 10, 2019"
+output:
+  word_document: default
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+```
+
+```{r source-and-lib, message=FALSE, warning=FALSE, echo=FALSE}
+source('./R/combinations_functions.R')
+library(knitr)
+library(kableExtra)
+
+```
+
+```{r load_all_objects, results='hide', message=FALSE, warning=FALSE, echo=FALSE}
+source('./R/Forecasts and Comparisons/Uruguay/new forecast and comparison script Uruguay.R')
+```
+### 1A) Proyecciónes Modelos VAR
+```{r pointforecats, echo=FALSE, results='asis'}
+colnames(df_forecasts_all_models) <- c("Modelo", "2019", "2020")
+# cbind(df_forecasts_all_models, annual_mean_top10_table[1, c(1:2)])
+
+# df_forecasts_all_models$`2019` <- round(df_forecasts_all_models$`2019`, digits = 2)
+# df_forecasts_all_models$`2020` <- round(df_forecasts_all_models$`2020`, digits = 2)
+forecast_table <- kable(df_forecasts_all_models, caption = "Proyección 2019 and 2020 de differentes combinaciones de los modelos VAR",
+             align = c('c', 'c', 'c'), digits = 2) %>% kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                                                         full_width = T, position = "left", font_size = 11)
+
+forecast_table 
+
+```
+
+```{r infotext, echo=FALSE, results='asis'}
+year_1 <- df_forecasts_all_models[,2]
+year_2 <- df_forecasts_all_models[,3]
+columnnames <- colnames(df_forecasts_all_models)
+name_year1 <- columnnames[2]
+name_year2 <- columnnames[3]
+min_forecast_year1 <- round(min(year_1), digits = 2)
+max_forecast_year1 <- round(max(year_1), digits = 2)
+min_forecast_year2 <- round(min(year_2), digits = 2)
+max_forecast_year2 <- round(max(year_2), digits = 2)
+vector_top_10 <- count_year1$variable
+forecast_first_year <- round(df_forecasts_all_models[3,2], digits = 2)
+gdp_growth_last_year <- yoy_df_top10_variables[1, 11]
+difference_forecast <-  round((forecast_first_year - gdp_growth_last_year), digits = 2)
+
+```
+
+### 1B) La narrativa de la proyeccion
+
+Para Uruguay el rango de las proyecciones de `r name_year1` es entre `r min_forecast_year1` y `r max_forecast_year1` y para `r name_year2` el rango es entre `r min_forecast_year2` y `r max_forecast_year2`. Los variables más importantes que impulsan la proyección de `r name_year1` y explican la dinámica del VAR son: `r vector_top_10`
+
+Con respeto al 2019, la proyección de los mejores 30 modelos VAR es `r forecast_first_year`, y como puedes ver en la figura 1, esto es `r difference_forecast` en comparacion al año pasado. Este cambio se explica principalmente por factores en
+
+```{r annual_forecast_bar_plot, echo=FALSE, fig.align='left'}
+annual_forecast_bar_plot
+```
+
+### 1C) La dinámica asumida en los modelos
+
+Aqui podemos discutir las proyecciones de los variables que produce los VARs. 
+
+### 1D) Análisis de escenarios
+
+Cuando sabemos la dinamica de los variables en el VAR podemos experimentar dinamicas espesificas. Por ejemplo, si los VARs predicen que rpc crece 2.0%, que pasa con la proyeccion del PIB 2019 si asumimos un crecimiento de rpc de 4.0%.
+
+## 2) Resumen de los datos principales
+
+### 2a) Resumen Datos VAR
+
+```{r Top 10 Variables in best 10 VAR Models, echo=FALSE, results='asis'}
+# count_year1
+# correlations_df
+df <- data.frame(Variable = count_year1$variable,
+                 Definicion = c("Indice de Volumen Físico de la Industria Manufacturera (sin ancap)", 
+                                "Produccion sector servicios", 
+                                "Economic activity indicator Brazil",
+                                "Terminos de intercambio", 
+                                "Imports of capital goods", 
+                                "Produccion Industrial EEUU", 
+                                "M1", 
+                                "Produccion industrial Brasil", 
+                                "Indice de Volumen Físico de la Industria Manufacturera (sin ancap, desestacionalizado)", 
+                                "Consumo gobierno, real"),
+                 Count = count_year1$year1,
+                 Contemporaneous_correlation_GDP = correlations_df$correlation_with_gdp)
+
+count_table <- kable(df, caption = "Las 10 variables más importantes en los mejores 10 modelos VAR",
+             align = c('c', 'c', 'c', 'c'), digits = 2) %>% kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, position = "left", font_size = 11)
+
+count_table
+```
+
+```{r Summary Top 10 Variables in best 10 VAR Models, echo=FALSE, results='asis'}
+colnames(yoy_df_top10_variables) <- c("2017q1", "2017q2", "2017q3", "2017q4", "2018q1", "2018q2", "2018q3", "2018q4",
+                                      "2019q1", "2017", "2018")
+# yoy_df_top10_variables
+
+knitr::kable(yoy_df_top10_variables, caption = "Resumen  de las 10 variables más importantes en los mejores 10 modelos VAR", digits = 2) %>% kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                                                         full_width = F, position = "left", font_size = 11)
+
+```
+
+### 2b) Datos por componentes de la demanda
+```{r Datos por componentes de la demanda, echo=FALSE, results='asis'}
+colnames(df_componentes_demanda_shares_y_contribucion_table) <- c("2017q1", "2017q2", "2017q3", "2017q4", "2018q1", "2018q2", "2018q3", "2018q4", "2017", "2018")
+# yoy_df_top10_variables
+
+knitr::kable(df_componentes_demanda_shares_y_contribucion_table, caption = "Por componentes de la demanda", digits = 2) %>% kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                                                         full_width = F, position = "left", font_size = 11)
+
+```
+
+
+### 2c) Datos por componentes de la oferta
+```{r Datos por componentes de la oferta, echo=FALSE, results='asis'}
+colnames(df_componentes_oferta_shares_y_contribucion_table) <- c("2017q1", "2017q2", "2017q3", "2017q4", "2018q1", "2018q2", "2018q3", "2018q4", "2017", "2018")
+# yoy_df_top10_variables
+
+knitr::kable(df_componentes_oferta_shares_y_contribucion_table, caption = "Por componentes de la oferta", digits = 2) %>% kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                                                         full_width = F, position = "left", font_size = 11)
+
+```
+
+### 2d) Respuesta al impulso
+
+Tal vez podemos incluir las respuestas a los impulsos para documentar la dinamica atras los VARs. Eso nos ayuda para formar una narrativa. 
+
+### 2e) Gráficos de las 10 variables más importantes (variación anual )
+
+```{r variable_1, echo=FALSE}
+list_top_variables_graphs[[1]]
+```
+
+```{r  variable_2, echo=FALSE}
+list_top_variables_graphs[[2]]
+```
+
+
+
+```{r  variable_3, echo=FALSE}
+list_top_variables_graphs[[3]]
+```
+
+```{r variable_4, echo=FALSE}
+list_top_variables_graphs[[4]]
+```
+
+```{r variable_5, echo=FALSE}
+list_top_variables_graphs[[5]]
+```
+
+
+```{r variable_6, echo=FALSE}
+list_top_variables_graphs[[6]]
+```
+
+```{r variable_7, echo=FALSE}
+list_top_variables_graphs[[7]]
+```
+
+```{r variable_8, echo=FALSE}
+list_top_variables_graphs[[8]]
+```
+
+```{r variable_9, echo=FALSE}
+list_top_variables_graphs[[9]]
+```
+
+```{r variable_10, echo=FALSE}
+list_top_variables_graphs[[10]]
+```
+
+
+
+
